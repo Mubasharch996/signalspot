@@ -7,14 +7,12 @@ rm -rf "$ROOT/build"; mkdir -p "$ROOT/build"; cd "$ROOT/build"
 npx --yes @react-native-community/cli@12 init SignalSpotApp --version 0.73.6 --package-name com.signalspot --title SignalSpot --skip-install --skip-git-init
 cd "$APP"
 npm install
-# React Native 0.73.6 expects React 18.2.0; using 18.3.1 creates the peer dependency conflict seen in CI.
-npm install react@18.2.0 --save-exact
+# React Native 0.73.6 is compatible with React 18.3.x; keep React aligned with react-native-maps peers.
+npm install react@18.3.1 --save-exact
 node -e '
 const p=require(process.env.ROOT+"/package.json").dependencies;
 delete p["react"];delete p["react-native"];
 require("child_process").execSync("npm install --save "+Object.entries(p).map(([k,v])=>`${k}@\"${v}\"`).join(" "),{stdio:"inherit"});' 
-# Pin react-native-maps to a version compatible with React 18.2.0 to avoid peer dependency conflicts in CI
-npm install react-native-maps@1.11.3 --save-exact
 cp -r "$ROOT/src" ./src && cp "$ROOT/App.tsx" ./App.tsx
 # Native module
 J=android/app/src/main/java/com/signalspot
@@ -32,7 +30,7 @@ KT
 sed -i 's#// add(MyReactNativePackage())#add(SignalPackage())#' $J/MainApplication.kt
 # Permissions + Maps key
 M=android/app/src/main/AndroidManifest.xml
-sed -i 's#<uses-permission android:name="android.permission.INTERNET" />#<uses-permission android:name="android.permission.INTERNET" /><uses-permission android:name="android.permission.ACCESS_NETW[...]' $M
+sed -i 's#<uses-permission android:name="android.permission.INTERNET" />#<uses-permission android:name="android.permission.INTERNET" /><uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />#' $M
 sed -i "s#</application>#<meta-data android:name=\"com.google.android.geo.API_KEY\" android:value=\"${MAPS_API_KEY:-MISSING_KEY}\"/></application>#" $M
 cd android && chmod +x gradlew && ./gradlew assembleRelease --no-daemon
 mkdir -p "$ROOT/dist" && cp app/build/outputs/apk/release/app-release.apk "$ROOT/dist/SignalSpot.apk"
