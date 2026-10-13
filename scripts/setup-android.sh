@@ -7,6 +7,8 @@ rm -rf "$ROOT/build"; mkdir -p "$ROOT/build"; cd "$ROOT/build"
 npx --yes @react-native-community/cli@12 init SignalSpotApp --version 0.73.6 --package-name com.signalspot --title SignalSpot --skip-install --skip-git-init
 cd "$APP"
 npm install
+# React Native 0.73 ships with React 18.2.0, but react-native-maps 1.x requires >=18.3.1.
+npm install react@18.3.1 --save-exact
 node -e '
 const p=require(process.env.ROOT+"/package.json").dependencies;
 delete p["react"];delete p["react-native"];
@@ -28,7 +30,7 @@ KT
 sed -i 's#// add(MyReactNativePackage())#add(SignalPackage())#' $J/MainApplication.kt
 # Permissions + Maps key
 M=android/app/src/main/AndroidManifest.xml
-sed -i 's#<uses-permission android:name="android.permission.INTERNET" />#<uses-permission android:name="android.permission.INTERNET" /><uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /><uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /><uses-permission android:name="android.permission.READ_PHONE_STATE" /><uses-permission android:name="android.permission.VIBRATE" />#' $M
+sed -i 's#<uses-permission android:name="android.permission.INTERNET" />#<uses-permission android:name="android.permission.INTERNET" /><uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />#' $M
 sed -i "s#</application>#<meta-data android:name=\"com.google.android.geo.API_KEY\" android:value=\"${MAPS_API_KEY:-MISSING_KEY}\"/></application>#" $M
 cd android && chmod +x gradlew && ./gradlew assembleRelease --no-daemon
 mkdir -p "$ROOT/dist" && cp app/build/outputs/apk/release/app-release.apk "$ROOT/dist/SignalSpot.apk"
