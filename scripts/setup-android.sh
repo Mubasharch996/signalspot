@@ -7,12 +7,12 @@ rm -rf "$ROOT/build"; mkdir -p "$ROOT/build"; cd "$ROOT/build"
 npx --yes @react-native-community/cli@12 init SignalSpotApp --version 0.73.6 --package-name com.signalspot --title SignalSpot --skip-install --skip-git-init
 cd "$APP"
 npm install
-# React Native 0.73 ships with React 18.2.0, but react-native-maps 1.x requires >=18.3.1.
-npm install react@18.3.1 --save-exact
+# React Native 0.73.6 expects React 18.2.0; using 18.3.1 creates the peer dependency conflict seen in CI.
+npm install react@18.2.0 --save-exact
 node -e '
 const p=require(process.env.ROOT+"/package.json").dependencies;
 delete p["react"];delete p["react-native"];
-require("child_process").execSync("npm install --save "+Object.entries(p).map(([k,v])=>`${k}@"${v}"`).join(" "),{stdio:"inherit"});' 
+require("child_process").execSync("npm install --save "+Object.entries(p).map(([k,v])=>`${k}@\"${v}\"`).join(" "),{stdio:"inherit"});' 
 cp -r "$ROOT/src" ./src && cp "$ROOT/App.tsx" ./App.tsx
 # Native module
 J=android/app/src/main/java/com/signalspot
