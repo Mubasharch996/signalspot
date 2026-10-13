@@ -7,8 +7,8 @@ rm -rf "$ROOT/build"; mkdir -p "$ROOT/build"; cd "$ROOT/build"
 npx --yes @react-native-community/cli@12 init SignalSpotApp --version 0.73.6 --package-name com.signalspot --title SignalSpot --skip-install --skip-git-init
 cd "$APP"
 npm install
-# React Native 0.73.6 is compatible with React 18.3.x; keep React aligned with react-native-maps peers.
-npm install react@18.3.1 --save-exact
+# React Native 0.73.6 expects React 18.2.x. Keep React aligned with the RN peer requirement.
+npm install react@18.2.0 --save-exact
 node -e '
 const p=require(process.env.ROOT+"/package.json").dependencies;
 delete p["react"];delete p["react-native"];
